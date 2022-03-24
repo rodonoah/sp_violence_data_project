@@ -51,6 +51,12 @@ WebDriverWait(driver, 20).until(
 # Open the PD drop drown list
 depto_select = Select(driver.find_element(By.ID, 'conteudo_ddlDelegacias'))
 
+# Get list of PDs
+pds_list = []
+options = depto_select.options
+for index in range(1, len(options)):
+    pds_list.append(options[index].text)
+
 # Select the desired police department (We need to iterate over the +100 PDs in Sao Paulo)
 e = 1
 depto_select.select_by_index(e)
@@ -61,6 +67,12 @@ WebDriverWait(driver, 20).until(
 
 # Open the year drop down list
 year_select = Select(driver.find_element(By.ID, 'conteudo_ddlAnos'))
+
+# Get list of years
+years_list = []
+options = year_select.options
+for index in range(1, len(options)):
+    years_list.append(options[index].text)
 
 # Select the desired year (We need to iterate over the 20+ years of available data for each PD)
 j = 1
@@ -78,14 +90,24 @@ for row in table.find_elements(By.XPATH, './/tr'):
         temp_row.append(col.text)
     data.append(temp_row)
 
-df = pd.DataFrame(data, columns=['Tipo', 'Jan', 'Fev', 'Mar', 'Abr',
-                  'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez', 'Total'])
+child = pd.DataFrame(data, columns=['Tipo', 'Jan', 'Fev', 'Mar', 'Abr',
+                                    'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez', 'Total'])
 
-print(df)
+# Transposing and dropping the first column (None values) and last column (year total)
+child = child.transpose().iloc[:-1, 1:]
+child = child.reset_index()
 
-print('Worked')
+# Changing the header
+new_header = child.iloc[0]  # grab the first row for the header
+child = child[1:]  # take the data less the header row
+child.columns = new_header  # set the header row as the df header
 
-# Proximo passo: Remover 1 linha, adicionar coluna de ano, coluna de dp e depois pivotar meses com tipo
+# Adding the year and PD columns and renaming 'Tipo' to 'Mes'
+child.insert(0, 'Ano', years_list[j-1])
+child.insert(0, 'DP', pds_list[e-1])
+child = child.rename(columns={'Tipo': 'Mes'})
+print(child)
+
 
 # # Quit driver
 # driver.close()
