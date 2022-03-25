@@ -1,5 +1,4 @@
 # Importing modules
-import bs4
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -9,11 +8,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
-import time
-import random
 
 # Pre-scrapping work to avoid reCaptcha detection
 options = webdriver.ChromeOptions()
@@ -57,10 +52,6 @@ options = depto_select.options
 for index in range(1, len(options)):
     pds_list.append(options[index].text)
 
-# Select the desired police department (We need to iterate over the +100 PDs in Sao Paulo)
-e = 1
-depto_select.select_by_index(e)
-
 # Wait for the ddm to be visible [YEAR]
 WebDriverWait(driver, 20).until(
     EC.presence_of_element_located((By.ID, 'conteudo_ddlAnos')))
@@ -74,40 +65,54 @@ options = year_select.options
 for index in range(1, len(options)):
     years_list.append(options[index].text)
 
-# Select the desired year (We need to iterate over the 20+ years of available data for each PD)
-j = 1
-year_select.select_by_index(j)
-time.sleep(2)
+# Looping through the years for each PD
+small_dfs = []
 
-# Creating DataFrame from table
-data = []
-table = WebDriverWait(driver, 20).until(
-    EC.presence_of_element_located((By.ID, 'conteudo_repAnos_gridDados_0')))
-for row in table.find_elements(By.XPATH, './/tr'):
-    cols = row.find_elements(By.XPATH, './/td')
-    temp_row = []
-    for col in cols:
-        temp_row.append(col.text)
-    data.append(temp_row)
+for e in pds_list:
+    WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.ID, 'conteudo_ddlDelegacias')))
+    depto_select = Select(driver.find_element(By.ID, 'conteudo_ddlDelegacias'))
+    depto_select.select_by_visible_text(e)
 
-child = pd.DataFrame(data, columns=['Tipo', 'Jan', 'Fev', 'Mar', 'Abr',
-                                    'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez', 'Total'])
+    for i in years_list:
+        WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.ID, 'conteudo_ddlAnos')))
+        year_select = Select(driver.find_element(By.ID, 'conteudo_ddlAnos'))
+        year_select.select_by_visible_text(i)
 
-# Transposing and dropping the first column (None values) and last column (year total)
-child = child.transpose().iloc[:-1, 1:]
-child = child.reset_index()
+        # Creating DataFrame from table
+        data = []
+        table = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.ID, 'conteudo_repAnos_gridDados_0')))
+        for row in table.find_elements(By.XPATH, './/tr'):
+            cols = row.find_elements(By.XPATH, './/td')
+            temp_row = []
+            for col in cols:
+                temp_row.append(col.text)
+            data.append(temp_row)
 
-# Changing the header
-new_header = child.iloc[0]  # grab the first row for the header
-child = child[1:]  # take the data less the header row
-child.columns = new_header  # set the header row as the df header
+        child = pd.DataFrame(data, columns=[
+            'Tipo', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez', 'Total'])
 
-# Adding the year and PD columns and renaming 'Tipo' to 'Mes'
-child.insert(0, 'Ano', years_list[j-1])
-child.insert(0, 'DP', pds_list[e-1])
-child = child.rename(columns={'Tipo': 'Mes'})
-print(child)
+        # Transposing and dropping the first column (None values) and last column (year total)
+        child = child.transpose().iloc[:-1, 1:]
+        child = child.reset_index()
 
+        # Setting the first row as the header
+        new_header = child.iloc[0]  # grab the first row for the header
+        child = child[1:]  # take the data less the header row
+        child.columns = new_header  # set the header row as the df header
 
-# # Quit driver
-# driver.close()
+        # Adding the year and PD columns and renaming 'Tipo' to 'Mes'
+        child.insert(0, 'Ano', i)
+        child.insert(0, 'DP', e)
+        child = child.rename(columns={'Tipo': 'Mes'})
+        # Appending the small df to the list of dfs
+        small_dfs.append(child)
+        print(f'Year {i} done')
+    break
+large_df = pd.concat(small_dfs, ignore_index=True)
+print(large_df)
+large_df.to_csv('se_dp_test.csv', encoding='utf-8', index=False, header=True)
+# Quit driver
+driver.quit()
