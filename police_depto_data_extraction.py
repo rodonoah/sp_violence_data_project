@@ -1,4 +1,6 @@
 # Importing modules
+import json
+import pprint
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -52,7 +54,16 @@ options = depto_select.options
 for index in range(1, len(options)):
     pds_list.append(options[index].text)
 pds_list = [dp for dp in pds_list if 'DP -' in dp]
-print(pds_list)
+# pprint.pprint(pds_list)
+
+# Converting the pds coordinates text file into a list
+with open('pds_coordinates00:01:25.txt', 'r') as f:
+    pds_coordinates = json.loads(f.read())
+# pprint.pprint(pds_coordinates)
+
+# Merging PDs names with their coordinates into a dict
+pds_info = dict(zip(pds_list, pds_coordinates))
+# pprint.pprint(pds_info)
 
 # Wait for the ddm to be visible [YEAR]
 WebDriverWait(driver, 20).until(
@@ -70,11 +81,12 @@ for index in range(1, len(options)):
 # Looping through the years for each PD
 small_dfs = []
 
-for e in pds_list:
+# for e in pds_list:
+for key in pds_info:
     WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.ID, 'conteudo_ddlDelegacias')))
     depto_select = Select(driver.find_element(By.ID, 'conteudo_ddlDelegacias'))
-    depto_select.select_by_visible_text(e)
+    depto_select.select_by_visible_text(key)
 
     for i in years_list:
         WebDriverWait(driver, 20).until(
@@ -105,16 +117,19 @@ for e in pds_list:
         child = child[1:]  # take the data less the header row
         child.columns = new_header  # set the header row as the df header
 
-        # Adding the year and PD columns and renaming 'Tipo' to 'Mes'
+        # Adding the year, coordinates and PD name columns and renaming column name 'Tipo' to 'Mes'
         child.insert(0, 'Ano', i)
-        child.insert(0, 'DP', e)
+        child.insert(0, 'Coordenadas', str(pds_info[key]))
+        child.insert(0, 'DP', key)
         child = child.rename(columns={'Tipo': 'Mes'})
         # Appending the small df to the list of dfs
         small_dfs.append(child)
         print(f'Year {i} done')
+    print(f'PD {key} done')
     break
 large_df = pd.concat(small_dfs, ignore_index=True)
 print(large_df)
 large_df.to_csv('se_dp_test.csv', encoding='utf-8', index=False, header=True)
+
 # Quit driver
 driver.quit()

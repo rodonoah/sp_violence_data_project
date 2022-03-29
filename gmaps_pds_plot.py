@@ -4,8 +4,7 @@ import gmplot
 apikey = ''  # (your API key here)
 gmap = gmplot.GoogleMapPlotter(-23.533773, -46.625290, 12, apikey=apikey)
 
-lat_1, long_1 = gmplot.GoogleMapPlotter.geocode(
-    'RUA DA GLÓRIA, 410', apikey=apikey)
+lat_1, long_1 = gmplot.GoogleMapPlotter.geocode('RUA DA GLÓRIA, 410', apikey=apikey)
 
 lat_2, long_2 = gmplot.GoogleMapPlotter.geocode(
     'RUA JARAGUÁ, 383', apikey=apikey)
