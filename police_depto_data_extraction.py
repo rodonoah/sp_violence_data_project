@@ -1,6 +1,7 @@
 # Importing modules
 import json
 import pprint
+import time
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
@@ -126,10 +127,16 @@ for key in pds_info:
         small_dfs.append(child)
         print(f'Year {i} done')
     print(f'PD {key} done')
-    break
+    if key == '003 DP - Campos Elísios':
+        break
 large_df = pd.concat(small_dfs, ignore_index=True)
 print(large_df)
-large_df.to_csv('se_dp_test.csv', encoding='utf-8', index=False, header=True)
+
+# Save to csv
+t = time.localtime()
+current_time = time.strftime("%H:%M:%S", t)
+large_df.to_csv(f'large_df_{current_time}.csv',
+                encoding='utf-8', index=False, header=True)
 
 # Quit driver
 driver.quit()

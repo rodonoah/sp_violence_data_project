@@ -1,58 +1,64 @@
+from dataclasses import replace
 import gmplot
+import pandas as pd
 
+# Reading file and changing column type to int for desired columns
+df = pd.read_csv('large_df_22:25:30.csv')
+ocurrences_column_names = df.columns.values.tolist()[4:]
+for column in ocurrences_column_names:
+    df[column] = pd.to_numeric(df[column], errors='coerce')
+# print(df.info())
+
+# print(df.type())
+# Total ocurrences column
+df['Total Ocorrencias'] = df.iloc[:, 4:].sum(axis=1)
+# print(df)
+
+# Grouping total ocurrences by PD
+grouped_pd_year = df.groupby(['DP', 'Coordenadas', 'Ano'])[
+    'Total Ocorrencias'].sum().reset_index()
+
+# print(grouped_pd_year)
+
+# Filtering for specific year
+one_year = grouped_pd_year.loc[grouped_pd_year['Ano'] == 2021]
+
+# print(one_year)
+
+# Exporting lists
+pds_final_list = one_year['Coordenadas'].to_list()
+pds_final_list = [e.replace('[', "") for e in pds_final_list]
+pds_final_list = [e.replace(']', "") for e in pds_final_list]
+# pds_final_list = [tuple(item) for item in pds_final_list]
+total_occurences_list = one_year['Total Ocorrencias'].to_list()
+
+
+# Need to use a rank as oppose to big number
+# total_occurences_list = [4, 12, 37]
+
+# Cleaning up lats and longs
+lats = []
+longs = []
+for item in pds_final_list:
+    lats.append(item.split(', ')[0])
+    longs.append(item.split(', ')[1])
+lats = [float(lat) for lat in lats]
+longs = [float(long) for long in longs]
+# print(lats)
+# print(longs)
+# print(pds_final_list)
+# print(total_occurences_list)
+pds = list(zip(lats, longs))
+
+print(pds)
 # Create the map plotter:
 apikey = ''  # (your API key here)
+
 gmap = gmplot.GoogleMapPlotter(-23.533773, -46.625290, 12, apikey=apikey)
 
-lat_1, long_1 = gmplot.GoogleMapPlotter.geocode('RUA DA GLÓRIA, 410', apikey=apikey)
+dps = zip(*pds)
 
-lat_2, long_2 = gmplot.GoogleMapPlotter.geocode(
-    'RUA JARAGUÁ, 383', apikey=apikey)
-
-dps = zip(*[
-    (lat_1, long_1),
-    (lat_2, long_2)
-])
-
-gmap.heatmap(
-    *dps,
-    radius=40,
-    weights=[10, 1],
-    gradient=[(0, 255, 0, 0), (0, 255, 0, 0.5), (255, 0, 0, 1)]
-)
+gmap.heatmap(*dps, radius=40, weights=total_occurences_list,
+             gradient=[(0, 0, 255, 0), (0, 255, 0, 0.9), (255, 0, 0, 1)])
 
 gmap.draw('map.html')
-
-
-# Mark a hidden gem:
-# gmap.marker(37.770776, -122.461689, color='cornflowerblue')
-
-# Highlight some attractions:
-# attractions_lats, attractions_lngs = zip(*[
-#     (37.769901, -122.498331),
-#     (37.768645, -122.475328),
-#     (37.771478, -122.468677),
-#     (37.769867, -122.466102),
-#     (37.767187, -122.467496),
-#     (37.770104, -122.470436)
-# ])
-# gmap.scatter(attractions_lats, attractions_lngs,
-#              color='#3B0B39', size=40, marker=False)
-
-# Outline the Golden Gate Park:
-# golden_gate_park = zip(*[
-#     (37.771269, -122.511015),
-#     (37.773495, -122.464830),
-#     (37.774797, -122.454538),
-#     (37.771988, -122.454018),
-#     (37.773646, -122.440979),
-#     (37.772742, -122.440797),
-#     (37.771096, -122.453889),
-#     (37.768669, -122.453518),
-#     (37.766227, -122.460213),
-#     (37.764028, -122.510347)
-# ])
-# gmap.polygon(*golden_gate_park, color='cornflowerblue', edge_width=10)
-
-# Draw the map to an HTML file:
-# gmap.draw('map.html')
