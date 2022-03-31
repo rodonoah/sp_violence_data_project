@@ -127,7 +127,7 @@ for key in pds_info:
         small_dfs.append(child)
         print(f'Year {i} done')
     print(f'PD {key} done')
-    if key == '003 DP - Campos Elísios':
+    if key == '003 DP - Campos Elísios':  # Need to remove this line for extracting the data for all departments
         break
 large_df = pd.concat(small_dfs, ignore_index=True)
 print(large_df)
