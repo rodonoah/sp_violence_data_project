@@ -2,7 +2,7 @@ import gmplot
 import pandas as pd
 
 # Reading file and changing column type to int for desired columns
-df = pd.read_csv('large_df_22:25:30.csv')
+df = pd.read_csv('large_df_20:26:08.csv')
 ocurrences_column_names = df.columns.values.tolist()[4:]
 for column in ocurrences_column_names:
     df[column] = pd.to_numeric(df[column], errors='coerce')
@@ -39,13 +39,14 @@ longs = [float(long) for long in longs]
 pds = list(zip(lats, longs))
 
 # Create the map plotter:
-apikey = ''  # (your API key here)
+apikey = 'AIzaSyCdfNQ_FYCH1CMsYw0Hq6PU31GRLAVbPEM'  # (your API key here)
 
+# Coordinates of Sao Paulo
 gmap = gmplot.GoogleMapPlotter(-23.533773, -46.625290, 11, apikey=apikey)
 
 dps = zip(*pds)
 
 gmap.heatmap(*dps, radius=30, weights=ranking,
-             gradient=[(0, 0, 255, 0), (0, 255, 0, 0.9), (255, 0, 0, 1)])
+             gradient=[(0, 0, 255, 0), (0, 255, 0, 0.1), (255, 0, 0, 1)])
 
 gmap.draw('map.html')

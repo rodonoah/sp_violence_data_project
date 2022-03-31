@@ -82,13 +82,15 @@ for index in range(1, len(options)):
 # Looping through the years for each PD
 small_dfs = []
 
+
+p = 1
 # for e in pds_list:
 for key in pds_info:
     WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.ID, 'conteudo_ddlDelegacias')))
     depto_select = Select(driver.find_element(By.ID, 'conteudo_ddlDelegacias'))
     depto_select.select_by_visible_text(key)
-
+    # counter
     for i in years_list:
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.ID, 'conteudo_ddlAnos')))
@@ -127,10 +129,12 @@ for key in pds_info:
         small_dfs.append(child)
         print(f'Year {i} done')
     print(f'PD {key} done')
-    if key == '003 DP - Campos Elísios':  # Need to remove this line for extracting the data for all departments
+    if p == 25:
+        # if key == '003 DP - Campos Elísios':  # Need to remove this line for extracting the data for all departments
         break
+    p += 1
 large_df = pd.concat(small_dfs, ignore_index=True)
-print(large_df)
+# print(large_df)
 
 # Save to csv
 t = time.localtime()
@@ -138,5 +142,6 @@ current_time = time.strftime("%H:%M:%S", t)
 large_df.to_csv(f'large_df_{current_time}.csv',
                 encoding='utf-8', index=False, header=True)
 
+print('Large PDs csv exported!')
 # Quit driver
 driver.quit()
