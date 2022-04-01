@@ -15,33 +15,25 @@ df['Total Ocorrencias'] = df.iloc[:, 4:].sum(axis=1)
 df = df.groupby(['DP', 'Coordenadas', 'Ano'])[
     'Total Ocorrencias'].sum().reset_index()
 
-
 # Rank column
 df['Rank'] = df.groupby(
     'Ano')['Total Ocorrencias'].rank(ascending=False)
 
-# print(df)
-
 # Filtering for specific year
 df = df.loc[df['Ano'] == 2021]
 
-# print(df)
+a = df['Total Ocorrencias'].quantile(1/6)
+b = df['Total Ocorrencias'].quantile(1/3)
+c = df['Total Ocorrencias'].quantile(1/5)
+d = df['Total Ocorrencias'].quantile(2/3)
+e = df['Total Ocorrencias'].quantile(5/6)
 
-a = df['Total Ocorrencias'].quantile(0.2)
-b = df['Total Ocorrencias'].quantile(0.4)
-c = df['Total Ocorrencias'].quantile(0.6)
-d = df['Total Ocorrencias'].quantile(0.8)
-
-print(a)
-print(b)
-print(c)
-print(d)
 df['Group'] = np.where(df['Total Ocorrencias'] < a, 1, np.where(df['Total Ocorrencias'] < b, 2, np.where(
-    df['Total Ocorrencias'] < c, 3, np.where(df['Total Ocorrencias'] < d, 4, 5))))
+    df['Total Ocorrencias'] < c, 3, np.where(df['Total Ocorrencias'] < d, 4, np.where(df['Total Ocorrencias'] < e, 5, 6)))))
 
 
-df['Color'] = np.where(df['Group'] == 1, '#00FF7F', np.where(df['Group'] == 2, '#3BCA6D', np.where(
-    df['Group'] == 3, '#77945C', np.where(df['Group'] == 4, '#B25F4A', '#ED2938'))))
+df['Color'] = np.where(df['Group'] == 1, '#69B34C', np.where(df['Group'] == 2, '#ACB334', np.where(
+    df['Group'] == 3, '#FAB733', np.where(df['Group'] == 4, '#FF8E15', np.where(df['Group'] == 5, '#FF4E11', '#FF0D0D')))))
 print(df)
 
 # Exporting lists
@@ -58,15 +50,8 @@ for item in pds_final_list:
     longs.append(item.split(', ')[1])
 lats = [float(lat) for lat in lats]
 longs = [float(long) for long in longs]
-# pds = list(zip(lats, longs))
-# pair = dict(zip(pds, colors))
-
-# dps = zip(*pds)
 
 trio = zip(lats, longs, colors)
-# print(pds)
-# print(dps)
-
 
 # Create the map plotter:
 apikey = 'AIzaSyCdfNQ_FYCH1CMsYw0Hq6PU31GRLAVbPEM'  # (your API key here)
@@ -74,10 +59,8 @@ apikey = 'AIzaSyCdfNQ_FYCH1CMsYw0Hq6PU31GRLAVbPEM'  # (your API key here)
 # Coordinates of Sao Paulo
 gmap = gmplot.GoogleMapPlotter(-23.533773, -46.625290, 11, apikey=apikey)
 
-# gmap.heatmap(*dps, radius=30, weights=ranking,
-#              gradient=[(0, 0, 255, 0), (0, 255, 0, 0.9), (255, 0, 0, 1)])
-
+# Considering a 5km2 area coverage for each DP
 for item in trio:
-    gmap.circle(item[0], item[1], 600, edge_alpha=0, color=item[2])
+    gmap.circle(item[0], item[1], 1260, edge_alpha=0, color=item[2])
 
 gmap.draw('map.html')
