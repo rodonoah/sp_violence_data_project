@@ -129,16 +129,16 @@ for key in pds_info:
         small_dfs.append(child)
         print(f'Year {i} done')
     print(f'PD {key} done')
-    if p == 25:
-        # if key == '003 DP - Campos Elísios':  # Need to remove this line for extracting the data for all departments
-        break
-    p += 1
+    # if p == 25:
+    # if key == '003 DP - Campos Elísios':  # Need to remove this line for extracting the data for all departments
+    # break
+    # p += 1
 large_df = pd.concat(small_dfs, ignore_index=True)
 # print(large_df)
 
 # Save to csv
 t = time.localtime()
-current_time = time.strftime("%H:%M:%S", t)
+current_time = time.strftime("%b%d%Y%H:%M:%S", t)
 large_df.to_csv(f'large_df_{current_time}.csv',
                 encoding='utf-8', index=False, header=True)
 

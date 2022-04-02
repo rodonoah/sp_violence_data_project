@@ -1,9 +1,10 @@
 import numpy as np
 import gmplot
 import pandas as pd
+import time
 
 # Reading file and changing column type to int for desired columns
-df = pd.read_csv('large_df_20:26:08.csv')
+df = pd.read_csv('large_df_Apr01202222:09:19.csv')
 ocurrences_column_names = df.columns.values.tolist()[4:]
 for column in ocurrences_column_names:
     df[column] = pd.to_numeric(df[column], errors='coerce')
@@ -20,7 +21,7 @@ df['Rank'] = df.groupby(
     'Ano')['Total Ocorrencias'].rank(ascending=False)
 
 # Filtering for specific year
-df = df.loc[df['Ano'] == 2021]
+df = df.loc[df['Ano'] == 2012]
 
 a = df['Total Ocorrencias'].quantile(1/6)
 b = df['Total Ocorrencias'].quantile(1/3)
@@ -35,6 +36,13 @@ df['Group'] = np.where(df['Total Ocorrencias'] < a, 1, np.where(df['Total Ocorre
 df['Color'] = np.where(df['Group'] == 1, '#69B34C', np.where(df['Group'] == 2, '#ACB334', np.where(
     df['Group'] == 3, '#FAB733', np.where(df['Group'] == 4, '#FF8E15', np.where(df['Group'] == 5, '#FF4E11', '#FF0D0D')))))
 print(df)
+
+# # Save to csv
+# t = time.localtime()
+# current_time = time.strftime("%b%d%Y%H:%M:%S", t)
+# df.to_csv(f'test_{current_time}.csv',
+#           encoding='utf-8', index=False, header=True)
+
 
 # Exporting lists
 pds_final_list = df['Coordenadas'].to_list()
@@ -54,7 +62,7 @@ longs = [float(long) for long in longs]
 trio = zip(lats, longs, colors)
 
 # Create the map plotter:
-apikey = 'AIzaSyCdfNQ_FYCH1CMsYw0Hq6PU31GRLAVbPEM'  # (your API key here)
+apikey = ''  # (your API key here)
 
 # Coordinates of Sao Paulo
 gmap = gmplot.GoogleMapPlotter(-23.533773, -46.625290, 11, apikey=apikey)
