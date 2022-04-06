@@ -2,6 +2,7 @@ import numpy as np
 import gmplot
 import pandas as pd
 import time
+import IPython
 
 # Reading file and changing column type to int for desired columns
 df = pd.read_csv('large_df_Apr01202222:09:19.csv')
@@ -16,12 +17,21 @@ df['Total Ocorrencias'] = df.iloc[:, 4:].sum(axis=1)
 df = df.groupby(['DP', 'Coordenadas', 'Ano'])[
     'Total Ocorrencias'].sum().reset_index()
 
-# Rank column
-df['Rank'] = df.groupby(
-    'Ano')['Total Ocorrencias'].rank(ascending=False)
+# Getting occurences for all 20 years
+df = df.groupby(['DP', 'Coordenadas'])['Total Ocorrencias'].sum().reset_index()
+df['Rank'] = df['Total Ocorrencias'].rank(ascending=False)
+df = df.sort_values(by=['Rank'])
 
-# Filtering for specific year
-df = df.loc[df['Ano'] == 2012]
+print(df)
+
+
+# This code is for retrieving a specific year only
+# # Rank column
+# df['Rank'] = df.groupby(
+#     'Ano')['Total Ocorrencias'].rank(ascending=False)
+
+# # Filtering for specific year
+# df = df.loc[df['Ano'] == 2021]
 
 a = df['Total Ocorrencias'].quantile(1/6)
 b = df['Total Ocorrencias'].quantile(1/3)
