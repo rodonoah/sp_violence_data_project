@@ -2,13 +2,24 @@ import numpy as np
 import gmplot
 import pandas as pd
 import time
-import IPython
 
 # Reading file and changing column type to int for desired columns
 df = pd.read_csv('large_df_Apr01202222:09:19.csv')
 ocurrences_column_names = df.columns.values.tolist()[4:]
 for column in ocurrences_column_names:
     df[column] = pd.to_numeric(df[column], errors='coerce')
+
+# Dropping columns containing the number of victims
+df = df[df.columns.drop(list(df.filter(regex='Nº DE VÍTIMAS')))]
+# print(df)
+
+# Dropping column duplicates
+df = df.drop(['ESTUPRO DE VULNERÁVEL', 'ESTUPRO', 'ROUBO - OUTROS'], axis=1)
+# print(df)
+
+# For "Crimes violentos" only drop columns
+df = df[df.columns.drop(list(df.filter(regex='CULPOS')))]
+df = df[df.columns.drop(list(df.filter(regex='FURTO')))]
 
 # Total crime ocurrences column
 df['Total Ocorrencias'] = df.iloc[:, 4:].sum(axis=1)
@@ -53,6 +64,8 @@ print(df)
 # df.to_csv(f'test_{current_time}.csv',
 #           encoding='utf-8', index=False, header=True)
 
+# Filter for specific group of color
+df = df[df['Group'].isin([5, 6])]
 
 # Exporting lists
 pds_final_list = df['Coordenadas'].to_list()
@@ -61,6 +74,10 @@ pds_final_list = [e.replace(']', "") for e in pds_final_list]
 colors = df['Color'].to_list()
 
 # Cleaning up lats and longs
+# lats, longs = zip(*pds_final_list)
+# print(lats)
+# print(longs)
+
 lats = []
 longs = []
 for item in pds_final_list:
@@ -75,10 +92,22 @@ trio = zip(lats, longs, colors)
 apikey = ''  # (your API key here)
 
 # Coordinates of Sao Paulo
-gmap = gmplot.GoogleMapPlotter(-23.533773, -46.625290, 11, apikey=apikey)
+gmap = gmplot.GoogleMapPlotter(-23.547, -46.63, 12, apikey=apikey)
 
 # Considering a 5km2 area coverage for each DP
 for item in trio:
     gmap.circle(item[0], item[1], 1260, edge_alpha=0, color=item[2])
+
+# Including cracolandia on the map
+craco_addresses = ['Av. São João, 377 - República, São Paulo - SP, 01035-000', 'Av. Cásper Líbero, 42 - Centro Histórico de São Paulo, São Paulo - SP, 01033-000', 'Praça da Luz, 1, Luz, São Paulo - SP',
+                   'Praça Júlio Prestes - Campos Elíseos, São Paulo - SP, 01218-020', 'Alameda Eduardo Prado, 61 - Campos Elíseos, São Paulo - SP, 01218-011', 'R. Barra Funda, 161 - Barra Funda, São Paulo - SP, 01152-000']
+
+coordinates = [gmplot.GoogleMapPlotter.geocode(
+    e, apikey=apikey) for e in craco_addresses]
+
+cracolandia = zip(*coordinates)
+
+gmap.polygon(*cracolandia, face_color='pink',
+             edge_color='cornflowerblue', edge_width=5)
 
 gmap.draw('map.html')
