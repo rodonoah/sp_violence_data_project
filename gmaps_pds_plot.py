@@ -21,6 +21,7 @@ df = df.drop(['ESTUPRO DE VULNERÁVEL', 'ESTUPRO', 'ROUBO - OUTROS'], axis=1)
 df = df[df.columns.drop(list(df.filter(regex='CULPOS')))]
 df = df[df.columns.drop(list(df.filter(regex='FURTO')))]
 
+print(df)
 # Total crime ocurrences column
 df['Total Ocorrencias'] = df.iloc[:, 4:].sum(axis=1)
 
