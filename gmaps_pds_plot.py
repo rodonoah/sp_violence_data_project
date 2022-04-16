@@ -17,11 +17,11 @@ df = df[df.columns.drop(list(df.filter(regex='Nº DE VÍTIMAS')))]
 df = df.drop(['ESTUPRO DE VULNERÁVEL', 'ESTUPRO', 'ROUBO - OUTROS'], axis=1)
 # print(df)
 
-# For "Crimes violentos" only drop columns
+# For "Crimes violentos" only drop columns contanining culposo and furtos
 df = df[df.columns.drop(list(df.filter(regex='CULPOS')))]
 df = df[df.columns.drop(list(df.filter(regex='FURTO')))]
 
-print(df)
+# print(df)
 # Total crime ocurrences column
 df['Total Ocorrencias'] = df.iloc[:, 4:].sum(axis=1)
 
@@ -47,7 +47,7 @@ print(df)
 
 a = df['Total Ocorrencias'].quantile(1/6)
 b = df['Total Ocorrencias'].quantile(1/3)
-c = df['Total Ocorrencias'].quantile(1/5)
+c = df['Total Ocorrencias'].quantile(1/2)
 d = df['Total Ocorrencias'].quantile(2/3)
 e = df['Total Ocorrencias'].quantile(5/6)
 
@@ -59,14 +59,14 @@ df['Color'] = np.where(df['Group'] == 1, '#69B34C', np.where(df['Group'] == 2, '
     df['Group'] == 3, '#FAB733', np.where(df['Group'] == 4, '#FF8E15', np.where(df['Group'] == 5, '#FF4E11', '#FF0D0D')))))
 print(df)
 
-# # Save to csv
-# t = time.localtime()
-# current_time = time.strftime("%b%d%Y%H:%M:%S", t)
-# df.to_csv(f'test_{current_time}.csv',
-#           encoding='utf-8', index=False, header=True)
-
 # Filter for specific group of color
-df = df[df['Group'].isin([5, 6])]
+# df = df[df['Group'].isin([5, 6])]
+
+# Save to csv
+t = time.localtime()
+current_time = time.strftime("%b%d%Y%H:%M:%S", t)
+df.to_csv(f'plotingviolentcrimes_{current_time}.csv',
+          encoding='utf-8', index=False, header=True)
 
 # Exporting lists
 pds_final_list = df['Coordenadas'].to_list()
@@ -90,7 +90,7 @@ longs = [float(long) for long in longs]
 trio = zip(lats, longs, colors)
 
 # Create the map plotter:
-apikey = ''  # (your API key here)
+apikey = 'AIzaSyCdfNQ_FYCH1CMsYw0Hq6PU31GRLAVbPEM'  # (your API key here)
 
 # Coordinates of Sao Paulo
 gmap = gmplot.GoogleMapPlotter(-23.547, -46.63, 12, apikey=apikey)
@@ -100,15 +100,15 @@ for item in trio:
     gmap.circle(item[0], item[1], 1260, edge_alpha=0, color=item[2])
 
 # Including cracolandia on the map
-craco_addresses = ['Av. São João, 377 - República, São Paulo - SP, 01035-000', 'Av. Cásper Líbero, 42 - Centro Histórico de São Paulo, São Paulo - SP, 01033-000', 'Praça da Luz, 1, Luz, São Paulo - SP',
-                   'Praça Júlio Prestes - Campos Elíseos, São Paulo - SP, 01218-020', 'Alameda Eduardo Prado, 61 - Campos Elíseos, São Paulo - SP, 01218-011', 'R. Barra Funda, 161 - Barra Funda, São Paulo - SP, 01152-000']
+# craco_addresses = ['Av. São João, 377 - República, São Paulo - SP, 01035-000', 'Av. Cásper Líbero, 42 - Centro Histórico de São Paulo, São Paulo - SP, 01033-000', 'Praça da Luz, 1, Luz, São Paulo - SP',
+#                    'Praça Júlio Prestes - Campos Elíseos, São Paulo - SP, 01218-020', 'Alameda Eduardo Prado, 61 - Campos Elíseos, São Paulo - SP, 01218-011', 'R. Barra Funda, 161 - Barra Funda, São Paulo - SP, 01152-000']
 
-coordinates = [gmplot.GoogleMapPlotter.geocode(
-    e, apikey=apikey) for e in craco_addresses]
+# coordinates = [gmplot.GoogleMapPlotter.geocode(
+#     e, apikey=apikey) for e in craco_addresses]
 
-cracolandia = zip(*coordinates)
+# cracolandia = zip(*coordinates)
 
-gmap.polygon(*cracolandia, face_color='pink',
-             edge_color='cornflowerblue', edge_width=5)
+# gmap.polygon(*cracolandia, face_color='pink',
+#              edge_color='cornflowerblue', edge_width=5)
 
 gmap.draw('map.html')
