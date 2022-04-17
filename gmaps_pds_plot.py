@@ -18,8 +18,8 @@ df = df.drop(['ESTUPRO DE VULNERÁVEL', 'ESTUPRO', 'ROUBO - OUTROS'], axis=1)
 # print(df)
 
 # For "Crimes violentos" only drop columns contanining culposo and furtos
-df = df[df.columns.drop(list(df.filter(regex='CULPOS')))]
-df = df[df.columns.drop(list(df.filter(regex='FURTO')))]
+# df = df[df.columns.drop(list(df.filter(regex='CULPOS')))]
+# df = df[df.columns.drop(list(df.filter(regex='FURTO')))]
 
 # print(df)
 # Total crime ocurrences column
@@ -65,39 +65,39 @@ print(df)
 # Save to csv
 t = time.localtime()
 current_time = time.strftime("%b%d%Y%H:%M:%S", t)
-df.to_csv(f'plotingviolentcrimes_{current_time}.csv',
+df.to_csv(f'plotingtotalcrimesrank_{current_time}.csv',
           encoding='utf-8', index=False, header=True)
 
 # Exporting lists
-pds_final_list = df['Coordenadas'].to_list()
-pds_final_list = [e.replace('[', "") for e in pds_final_list]
-pds_final_list = [e.replace(']', "") for e in pds_final_list]
-colors = df['Color'].to_list()
+# pds_final_list = df['Coordenadas'].to_list()
+# pds_final_list = [e.replace('[', "") for e in pds_final_list]
+# pds_final_list = [e.replace(']', "") for e in pds_final_list]
+# colors = df['Color'].to_list()
 
-# Cleaning up lats and longs
-# lats, longs = zip(*pds_final_list)
-# print(lats)
-# print(longs)
+# # Cleaning up lats and longs
+# # lats, longs = zip(*pds_final_list)
+# # print(lats)
+# # print(longs)
 
-lats = []
-longs = []
-for item in pds_final_list:
-    lats.append(item.split(', ')[0])
-    longs.append(item.split(', ')[1])
-lats = [float(lat) for lat in lats]
-longs = [float(long) for long in longs]
+# lats = []
+# longs = []
+# for item in pds_final_list:
+#     lats.append(item.split(', ')[0])
+#     longs.append(item.split(', ')[1])
+# lats = [float(lat) for lat in lats]
+# longs = [float(long) for long in longs]
 
-trio = zip(lats, longs, colors)
+# trio = zip(lats, longs, colors)
 
-# Create the map plotter:
-apikey = 'AIzaSyCdfNQ_FYCH1CMsYw0Hq6PU31GRLAVbPEM'  # (your API key here)
+# # Create the map plotter:
+# apikey = ''  # (your API key here)
 
-# Coordinates of Sao Paulo
-gmap = gmplot.GoogleMapPlotter(-23.547, -46.63, 12, apikey=apikey)
+# # Coordinates of Sao Paulo
+# gmap = gmplot.GoogleMapPlotter(-23.547, -46.63, 12, apikey=apikey)
 
-# Considering a 5km2 area coverage for each DP
-for item in trio:
-    gmap.circle(item[0], item[1], 1260, edge_alpha=0, color=item[2])
+# # Considering a 5km2 area coverage for each DP
+# for item in trio:
+#     gmap.circle(item[0], item[1], 1260, edge_alpha=0, color=item[2])
 
 # Including cracolandia on the map
 # craco_addresses = ['Av. São João, 377 - República, São Paulo - SP, 01035-000', 'Av. Cásper Líbero, 42 - Centro Histórico de São Paulo, São Paulo - SP, 01033-000', 'Praça da Luz, 1, Luz, São Paulo - SP',
@@ -111,4 +111,4 @@ for item in trio:
 # gmap.polygon(*cracolandia, face_color='pink',
 #              edge_color='cornflowerblue', edge_width=5)
 
-gmap.draw('map.html')
+# gmap.draw('map.html')
