@@ -24,8 +24,7 @@ df.set_axis(['distrito', 'area', 'pop', 'population_density'],
             axis=1, inplace=True)
 df = df[df["distrito"] != "TOTAL"]
 
-print(df)
-
+# Save to file
 t = time.localtime()
 current_time = time.strftime("%b%d%Y%H:%M:%S", t)
 df.to_csv(f'population_density_sp{current_time}.csv',

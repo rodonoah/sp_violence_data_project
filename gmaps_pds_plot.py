@@ -11,17 +11,14 @@ for column in ocurrences_column_names:
 
 # Dropping columns containing the number of victims
 df = df[df.columns.drop(list(df.filter(regex='Nº DE VÍTIMAS')))]
-# print(df)
 
 # Dropping column duplicates
 df = df.drop(['ESTUPRO DE VULNERÁVEL', 'ESTUPRO', 'ROUBO - OUTROS'], axis=1)
-# print(df)
 
 # For "Crimes violentos" only drop columns contanining culposo and furtos
 # df = df[df.columns.drop(list(df.filter(regex='CULPOS')))]
 # df = df[df.columns.drop(list(df.filter(regex='FURTO')))]
 
-# print(df)
 # Total crime ocurrences column
 df['Total Ocorrencias'] = df.iloc[:, 4:].sum(axis=1)
 
@@ -34,10 +31,7 @@ df = df.groupby(['DP', 'Coordenadas'])['Total Ocorrencias'].sum().reset_index()
 df['Rank'] = df['Total Ocorrencias'].rank(ascending=False)
 df = df.sort_values(by=['Rank'])
 
-print(df)
-
-
-# This code is for retrieving a specific year only
+# For retrieving only year specific records
 # # Rank column
 # df['Rank'] = df.groupby(
 #     'Ano')['Total Ocorrencias'].rank(ascending=False)
@@ -45,6 +39,7 @@ print(df)
 # # Filtering for specific year
 # df = df.loc[df['Ano'] == 2021]
 
+# Bucketing into sextiles
 a = df['Total Ocorrencias'].quantile(1/6)
 b = df['Total Ocorrencias'].quantile(1/3)
 c = df['Total Ocorrencias'].quantile(1/2)
@@ -69,46 +64,41 @@ df.to_csv(f'plotingtotalcrimesrank_{current_time}.csv',
           encoding='utf-8', index=False, header=True)
 
 # Exporting lists
-# pds_final_list = df['Coordenadas'].to_list()
-# pds_final_list = [e.replace('[', "") for e in pds_final_list]
-# pds_final_list = [e.replace(']', "") for e in pds_final_list]
-# colors = df['Color'].to_list()
+pds_final_list = df['Coordenadas'].to_list()
+pds_final_list = [e.replace('[', "") for e in pds_final_list]
+pds_final_list = [e.replace(']', "") for e in pds_final_list]
+colors = df['Color'].to_list()
 
-# # Cleaning up lats and longs
-# # lats, longs = zip(*pds_final_list)
-# # print(lats)
-# # print(longs)
+lats = []
+longs = []
+for item in pds_final_list:
+    lats.append(item.split(', ')[0])
+    longs.append(item.split(', ')[1])
+lats = [float(lat) for lat in lats]
+longs = [float(long) for long in longs]
 
-# lats = []
-# longs = []
-# for item in pds_final_list:
-#     lats.append(item.split(', ')[0])
-#     longs.append(item.split(', ')[1])
-# lats = [float(lat) for lat in lats]
-# longs = [float(long) for long in longs]
+trio = zip(lats, longs, colors)
 
-# trio = zip(lats, longs, colors)
+# Create the map plotter:
+apikey = ''  # (your GCP API key here)
 
-# # Create the map plotter:
-# apikey = ''  # (your API key here)
+# Coordinates of Sao Paulo
+gmap = gmplot.GoogleMapPlotter(-23.547, -46.63, 12, apikey=apikey)
 
-# # Coordinates of Sao Paulo
-# gmap = gmplot.GoogleMapPlotter(-23.547, -46.63, 12, apikey=apikey)
-
-# # Considering a 5km2 area coverage for each DP
-# for item in trio:
-#     gmap.circle(item[0], item[1], 1260, edge_alpha=0, color=item[2])
+# Considering a 5km2 area coverage for each DP
+for item in trio:
+    gmap.circle(item[0], item[1], 1260, edge_alpha=0, color=item[2])
 
 # Including cracolandia on the map
-# craco_addresses = ['Av. São João, 377 - República, São Paulo - SP, 01035-000', 'Av. Cásper Líbero, 42 - Centro Histórico de São Paulo, São Paulo - SP, 01033-000', 'Praça da Luz, 1, Luz, São Paulo - SP',
-#                    'Praça Júlio Prestes - Campos Elíseos, São Paulo - SP, 01218-020', 'Alameda Eduardo Prado, 61 - Campos Elíseos, São Paulo - SP, 01218-011', 'R. Barra Funda, 161 - Barra Funda, São Paulo - SP, 01152-000']
+craco_addresses = ['Av. São João, 377 - República, São Paulo - SP, 01035-000', 'Av. Cásper Líbero, 42 - Centro Histórico de São Paulo, São Paulo - SP, 01033-000', 'Praça da Luz, 1, Luz, São Paulo - SP',
+                   'Praça Júlio Prestes - Campos Elíseos, São Paulo - SP, 01218-020', 'Alameda Eduardo Prado, 61 - Campos Elíseos, São Paulo - SP, 01218-011', 'R. Barra Funda, 161 - Barra Funda, São Paulo - SP, 01152-000']
 
-# coordinates = [gmplot.GoogleMapPlotter.geocode(
-#     e, apikey=apikey) for e in craco_addresses]
+coordinates = [gmplot.GoogleMapPlotter.geocode(
+    e, apikey=apikey) for e in craco_addresses]
 
-# cracolandia = zip(*coordinates)
+cracolandia = zip(*coordinates)
 
-# gmap.polygon(*cracolandia, face_color='pink',
-#              edge_color='cornflowerblue', edge_width=5)
+gmap.polygon(*cracolandia, face_color='pink',
+             edge_color='cornflowerblue', edge_width=5)
 
-# gmap.draw('map.html')
+gmap.draw('map.html')

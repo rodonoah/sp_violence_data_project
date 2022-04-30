@@ -3,7 +3,6 @@ import gmplot
 import json
 import requests
 from bs4 import BeautifulSoup
-import pprint
 
 
 def get_pds_addresses_list(url):
@@ -26,23 +25,13 @@ def get_pds_addresses_list(url):
 data = get_pds_addresses_list(
     'https://pt.wikipedia.org/wiki/Distritos_policiais_da_cidade_de_S%C3%A3o_Paulo')
 
-pprint.pprint(data)
-
-apikey = ''  # (your API key here)
+# Geocoding
+apikey = ''  # (your GCP API key here)
 coordinates = [gmplot.GoogleMapPlotter.geocode(e, apikey=apikey) for e in data]
-
-pprint.pprint(coordinates)
-
 
 t = time.localtime()
 current_time = time.strftime("%H:%M:%S", t)
 
-
-# def save_coordinates_to_file(coordinates):
+# Save coordinates to file:
 with open(f'pds_coordinates{current_time}.txt', 'w') as f:
     f.write(json.dumps(coordinates))
-
-
-# #Now read the file back into a Python list object
-# with open('pds_coordinates.txt', 'r') as f:
-#     retrieve_coordinates = json.loads(f.read())

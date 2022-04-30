@@ -1,6 +1,5 @@
 # Importing modules
 import json
-import pprint
 import time
 import pandas as pd
 from selenium import webdriver
@@ -82,7 +81,6 @@ for index in range(1, len(options)):
 # Looping through the years for each PD
 small_dfs = []
 
-
 p = 1
 # for e in pds_list:
 for key in pds_info:
@@ -129,12 +127,7 @@ for key in pds_info:
         small_dfs.append(child)
         print(f'Year {i} done')
     print(f'PD {key} done')
-    # if p == 25:
-    # if key == '003 DP - Campos Elísios':  # Need to remove this line for extracting the data for all departments
-    # break
-    # p += 1
 large_df = pd.concat(small_dfs, ignore_index=True)
-# print(large_df)
 
 # Save to csv
 t = time.localtime()
