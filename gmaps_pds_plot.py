@@ -4,7 +4,7 @@ import pandas as pd
 import time
 
 # Reading file and changing column type to int for desired columns
-df = pd.read_csv('large_df_Apr01202222:09:19.csv')
+# df = pd.read_csv('') # csv file here
 ocurrences_column_names = df.columns.values.tolist()[4:]
 for column in ocurrences_column_names:
     df[column] = pd.to_numeric(df[column], errors='coerce')
