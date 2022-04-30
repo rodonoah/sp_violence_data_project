@@ -54,16 +54,13 @@ options = depto_select.options
 for index in range(1, len(options)):
     pds_list.append(options[index].text)
 pds_list = [dp for dp in pds_list if 'DP -' in dp]
-# pprint.pprint(pds_list)
 
 # Converting the pds coordinates text file into a list
 with open('pds_coordinates00:01:25.txt', 'r') as f:
     pds_coordinates = json.loads(f.read())
-# pprint.pprint(pds_coordinates)
 
 # Merging PDs names with their coordinates into a dict
 pds_info = dict(zip(pds_list, pds_coordinates))
-# pprint.pprint(pds_info)
 
 # Wait for the ddm to be visible [YEAR]
 WebDriverWait(driver, 20).until(
@@ -115,7 +112,7 @@ for key in pds_info:
 
         # Setting the first row as the header
         new_header = child.iloc[0]  # grab the first row for the header
-        child = child[1:]  # take the data less the header row
+        child = child[1:]  # retrieve the data besides the header
         child.columns = new_header  # set the header row as the df header
 
         # Adding the year, coordinates and PD name columns and renaming column name 'Tipo' to 'Mes'
